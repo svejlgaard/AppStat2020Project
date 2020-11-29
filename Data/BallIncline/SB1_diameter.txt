@@ -1,0 +1,4 @@
+#Small ball diameter (mm, [Simone, Niall, Charl]):
+10.00
+10.01
+9.95
