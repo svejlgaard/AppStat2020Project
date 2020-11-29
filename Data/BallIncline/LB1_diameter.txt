@@ -1,0 +1,4 @@
+#Large ball diameter (mm, [Simone, Niall, Charl]):
+13.05
+13.01
+12.95
