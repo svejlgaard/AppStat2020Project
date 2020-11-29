@@ -1,0 +1,4 @@
+#Rail diameter (mm, [Simone, Niall, Charl):
+3.75
+3.89
+3.98
