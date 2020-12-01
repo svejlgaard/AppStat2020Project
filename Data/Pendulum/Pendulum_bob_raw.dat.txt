@@ -1,0 +1,2 @@
+Pendulum bob measurement: Simone, Niall, Charl (mm)
+15.28 15.32 15.25
