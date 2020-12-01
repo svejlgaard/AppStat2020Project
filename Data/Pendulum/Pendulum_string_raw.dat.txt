@@ -1,0 +1,3 @@
+Pendulum string measurement(Simone, Niall, Charl): Top; Bottom; (cm)
+196.27 196.09 196.06
+5.29 5.25 5.26
