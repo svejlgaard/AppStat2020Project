@@ -14,7 +14,9 @@ random_state = 27
 plt.style.use('seaborn')
 
 
-filename = input('Please insert the name of the data file: ')
+filename = '../Data/Pendulum/'
+
+filename += input('Please insert the name of the data file: ')
 
 times = np.loadtxt(filename)
 
@@ -38,14 +40,23 @@ fit_residuals = y - (x*fit_slope + fit_cutoff)
 residual_err = np.std(fit_residuals)
 
 
-plt.figure(1)
-plt.errorbar(x,y, yerr=residual_err,fmt='.', label=f'Data with errors from fit {residual_err:.2f} s')
-plt.plot(x, x*fit_slope+fit_cutoff,label='Fit')
+fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(8, 10),
+                       gridspec_kw={'height_ratios':[4,1]}, sharex=True)
+ax[0].errorbar(x,y, yerr=residual_err,fmt='.', label=f'Data with errors from fit {residual_err:.2f} s')
+ax[0].plot(x, x*fit_slope+fit_cutoff,label='Fit')
 
-plt.legend()
+ax[1].plot(x, fit_residuals, label='Residuals')
 
-full_name = f'{filename.replace(".dat","")}_plot_with_residuals.pdf'
+fig.legend(loc='best')
 
-plt.savefig(full_name)
+name = f'{filename.replace(".dat","")}_plot_with_residuals.pdf'
+
+name = name.split('/')[-1]
+
+full_name = '../Figures/Pendulum/'
+
+full_name += name
+
+fig.savefig(full_name)
 
 print(f'The figure has been saved as {full_name}')
