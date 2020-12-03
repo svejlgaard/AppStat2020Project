@@ -26,7 +26,7 @@ def get_diameters():
         name = filename.split("/")[-1]
         data.columns = [f'{name.split("_")[0]}']
         data.index = ['Simone', 'Niall', 'Charl']
-        file_list.append(data)
+        file_list.append(data / 1000)
     
     data = pd.concat(file_list, axis=1)
 
