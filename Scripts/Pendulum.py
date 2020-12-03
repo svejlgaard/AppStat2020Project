@@ -41,6 +41,7 @@ class Pendulum():
         data_string.columns = ['Simone', 'Niall', 'Charl']
         data_string = data_string.transpose()
         data_string.columns = ['top','bottom']
+        
         len_string = data_string['top'] - data_string['bottom']
 
         data_bob = pd.read_csv(files[0], sep=" ")

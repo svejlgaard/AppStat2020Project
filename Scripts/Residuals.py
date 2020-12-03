@@ -76,6 +76,3 @@ def get_period(person_name):
     
 
     return popt[0], perr[0]
-
-
-get_period('Simone')
