@@ -38,7 +38,7 @@ def get_period(person_name):
     fit_cutoff = fit_param[1]
 
     fit_residuals = y - (x*fit_slope + fit_cutoff)
-
+    
     residual_err = np.std(fit_residuals)
     y_err = np.ones_like(y) * residual_err
 
@@ -62,6 +62,11 @@ def get_period(person_name):
     full_name += name
 
     fig.savefig(full_name)
+
+    fit_residuals = [fit_residuals]
+
+
+    np.savetxt(f'../Data/Pendulum/{filename.replace(".dat","").split("/")[-1]}_residuals.csv',fit_residuals, delimiter=",",fmt='%0.3f')
 
     print(f'The figure has been saved in {full_name.replace("..","")}')
 
