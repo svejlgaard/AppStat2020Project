@@ -89,7 +89,34 @@ class Ball():
     
 
     def get_angle(self):
-        print('Not yet inplemented')
+        angles = get_angles()
+        phi_r = angles[['inc_r', 'inc_flip_r']]
+        phi_l = angles[['inc_l','inc_flip_l']]
+
+        phi_r = phi_r.mean(axis=0)
+        phi_l = phi_l.mean(axis=0)
+
+        self.phi_r_mu = phi_r.mean()
+        self.phi_r_std = phi_r.std()
+        self.phi_r_mu_err = self.phi_r_std / np.sqrt(3)
+
+        self.phi_l_mu = phi_l.mean()
+        self.phi_l_std = phi_l.std()
+        self.phi_l_mu_err = self.phi_l_std / np.sqrt(3)
+
+        self.dphi_mu = self.phi_r_mu - self.phi_l_mu
+        self.dphi_std = self.phi_r_std + self.phi_l_std
+        self.dphi_mu_err = self.dphi_std / np.sqrt(2)
+
+
+
+
+        
+
+
+
+        
+
 
 
 # Usage example
@@ -101,3 +128,5 @@ small_ball.get_diameter()
 small_ball.get_peaks()
 
 small_ball.get_acc()
+
+small_ball.get_angle()
