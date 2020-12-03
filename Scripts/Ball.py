@@ -108,10 +108,24 @@ class Ball():
         self.dphi_std = self.phi_r_std + self.phi_l_std
         self.dphi_mu_err = self.dphi_std / np.sqrt(2)
 
-
-
-
+    def get_g(self):
+        rail = np.loadtxt('../Data/BallIncline/Rail_diameter.txt')
+        rail = rail / 1000
+        self.rail_mu = np.mean(rail)
+        self.rail_std = np.std(rail)
+        self.rail_mu_err = self.rail_std / np.sqrt(3)
+        paranthesis = 1 + ( (2/5) * (self.diameter_mean**2) / (self.diameter_mean**2 - self.rail_mu**2) )
         
+        self.g = paranthesis * self.a / np.sin(self.phi_r_mu - self.dphi_mu)
+        
+        err_term1 = paranthesis * 1/np.sin(self.phi_r_mu - self.dphi_mu) * self.a_err**2
+        err_term2 = self.a**2 * paranthesis * np.cos(self.phi_r_mu - self.dphi_mu)**2 / np.sin(self.phi_r_mu - self.dphi_mu)**4 * self.phi_r_std
+        err_term3 = self.a**2 * paranthesis * np.cos(self.phi_r_mu - self.dphi_mu)**2 / np.sin(self.phi_r_mu - self.dphi_mu)**4 * self.dphi_std
+        err_term4 = self.a**2 / np.sin(self.phi_r_mu - self.dphi_mu)**2 * (4*self.diameter_mean / (5* (self.diameter_mean**2 + self.rail_mu**2)) - 4*self.diameter_mean**3 / (5* (self.diameter_mean**2 + self.rail_mu**2)))**2 * self.diameter_std**2
+        err_term5 = self.a**2 * 16 * self.diameter_mean**4 * self.rail_mu**2 / (25 * np.sin(self.phi_r_mu - self.dphi_mu)**2 * (self.diameter_mean**2 - self.rail_mu**2)**4 ) * self.rail_std**2 
+
+        self.g_err = np.sqrt(err_term1 + err_term2 + err_term3 + err_term4 + err_term5)
+
 
 
 
@@ -130,3 +144,7 @@ small_ball.get_peaks()
 small_ball.get_acc()
 
 small_ball.get_angle()
+
+small_ball.get_g()
+
+print(f'We find g = {small_ball.g:.2f} +- {small_ball.g_err:.2f} m/s')
