@@ -41,7 +41,7 @@ class Pendulum():
         data_string.columns = ['Simone', 'Niall', 'Charl']
         data_string = data_string.transpose()
         data_string.columns = ['top','bottom']
-        
+
         len_string = data_string['top'] - data_string['bottom']
 
         data_bob = pd.read_csv(files[0], sep=" ")
@@ -49,6 +49,7 @@ class Pendulum():
         data_bob = data_bob.transpose()
         data_bob.index = ['Simone', 'Niall', 'Charl']
         data_bob = data_bob / 10
+        data_bob = data_bob / 2
 
         total_len = (len_string.values + data_bob.values) / 100
         
