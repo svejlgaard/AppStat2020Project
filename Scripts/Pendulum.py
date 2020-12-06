@@ -8,12 +8,15 @@ from statsmodels.stats.weightstats import DescrStatsW
 
 class Pendulum():
 
-    def __init__(self, namelist):
+    def __init__(self, namelist, printing = False):
         self.namelist = namelist
+        self.printing = printing
     
     def period(self):
 
         times = dict()
+
+        
 
         for name in self.namelist:
             t, terr = get_period(name)
@@ -23,11 +26,18 @@ class Pendulum():
         time_df = time_df.transpose()
         time_df.columns = (['period','error'])
         
-        time_weighted = DescrStatsW(time_df['period'], weights=time_df['error'])
+        if not self.printing:
+            time_weighted = DescrStatsW(time_df['period'], weights=time_df['error'])
 
-        self.T_mu = time_weighted.mean
-        self.T_sigma = time_weighted.std
-        self.T_mu_err = self.T_sigma / np.sqrt(len(self.namelist))
+            self.T_mu = time_weighted.mean
+            self.T_sigma = time_weighted.std
+            self.T_mu_err = self.T_sigma / np.sqrt(len(self.namelist))
+        
+        else:
+            self.T_mu = time_df['period'].values
+            self.T_sigma  = time_df['error'].values
+
+            print(f'{self.namelist[0]}s timing is {self.T_mu[0]:.4f} +- {self.T_sigma[0]:.4f}')
 
         
     def length(self):
@@ -53,21 +63,27 @@ class Pendulum():
 
         total_len = (len_string.values + data_bob.values) / 100
         
+        l_sys = 0.0005
+
         self.L_mu = np.mean(total_len)
-        self.L_sigma = np.std(total_len) 
+        self.L_sigma = np.std(total_len) + l_sys
         self.L_mu_err = self.L_sigma / np.sqrt(len(self.namelist))
+
+        if self.printing:
+            print(f'The length is {self.L_mu} +- {self.L_sigma}')
     
     def get_g(self):
         self.g = self.L_mu * (2*np.pi / self.T_mu)**2
         first = 1/(self.T_mu**4) * self.L_sigma**2
         second = 4*self.L_mu**2 / (self.T_mu**6) * self.T_sigma**2
-        self.g_sigma = 4*np.pi**2 * np.sqrt(first - second)
+        
+        self.g_sigma = 4*np.pi**2 * np.sqrt(np.abs(first - second))
 
         print(f'The value of g is {self.g} +- {self.g_sigma} m/s')
         
     
 
-pendulum = Pendulum(['Simone', 'Niall', 'Charl'])
+pendulum = Pendulum(['Simone','Niall','Charl'], printing=False)
 
 pendulum.period()
 pendulum.length()
