@@ -32,6 +32,7 @@ class Pendulum():
             self.T_mu = time_weighted.mean
             self.T_sigma = time_weighted.std
             self.T_mu_err = self.T_sigma / np.sqrt(len(self.namelist))
+            print(f'The pendulum period is {self.T_mu} +- {self.T_mu_err}')
         
         else:
             self.T_mu = time_df['period'].values
@@ -53,20 +54,23 @@ class Pendulum():
         data_string.columns = ['top','bottom']
 
         len_string = data_string['top'] - data_string['bottom']
-
+        
+        print(f'The length of the string is {np.mean(len_string.values):.2f} +- {np.std(len_string.values/np.sqrt(3)):.2f}')
+        
         data_bob = pd.read_csv(files[0], sep=" ")
         data_bob = data_bob.dropna(axis=1)
         data_bob = data_bob.transpose()
         data_bob.index = ['Simone', 'Niall', 'Charl']
+
+        print(f'The pendulum bob height is {np.mean(data_bob.values):.2f} +- {np.std(data_bob.values/np.sqrt(3)):.2f}')
+        
         data_bob = data_bob / 10
         data_bob = data_bob / 2
 
         total_len = (len_string.values + data_bob.values) / 100
-        
-        l_sys = 0.0005
 
         self.L_mu = np.mean(total_len)
-        self.L_sigma = np.std(total_len) + l_sys
+        self.L_sigma = np.std(total_len)
         self.L_mu_err = self.L_sigma / np.sqrt(len(self.namelist))
 
         if self.printing:
