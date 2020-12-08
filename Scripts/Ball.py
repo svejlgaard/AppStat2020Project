@@ -53,6 +53,7 @@ class Ball():
         self.diameter_mean = self.diameter.mean()
         self.diameter_mean_err = self.diameter.std()/np.sqrt(len(self.diameter))
         self.diameter_std = self.diameter.std()
+        print(f' The diameter of the {self.ball} is {1000*self.diameter_mean:.2f} +- {1000*self.diameter_mean_err:.2f}')
 
 
     def get_acc(self):
@@ -63,7 +64,6 @@ class Ball():
 
         ruler_measure = lengths.iloc[5:,:]
         ruler_measure = ruler_measure.reset_index(drop=True)
-    
         
         length_measure = pd.concat([fold_measure, ruler_measure], axis=1, copy=True)
         length_measure = length_measure / 100
@@ -88,6 +88,22 @@ class Ball():
         plt.ylabel('Position (m)')
         plt.legend()
         plt.savefig(f'../Figures/BallIncline/Acceleration_plot_{self.ball}_{self.orientation}.pdf')
+
+        data_final = open(f'../Data/BallIncline/Acceleration_plot_{self.ball}_{self.orientation}_results.pkl','wb')
+
+        dict_final = {'x': self.times,
+                    'y': self.length_mu,
+                    'y_err': self.length_mu_err,
+                    }
+        
+        for param in position_fit.values:
+            dict_final.update({f'fit_{param}': position_fit.values[param]})
+            dict_final.update({f'fit_{param}_err': position_fit.errors[param]})
+
+        import pickle
+        pickle.dump(dict_final, data_final, protocol=2)
+
+        data_final.close()
 
         self.a = position_fit.values["a"]
         self.a_err = position_fit.errors["a"]
