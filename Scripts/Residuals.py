@@ -70,6 +70,8 @@ def get_period(person_name):
 
     print(f'The figure has been saved in {full_name.replace("..","")}')
 
+    
+
 
     from scipy.optimize import curve_fit
   
@@ -78,6 +80,21 @@ def get_period(person_name):
     
     popt, pcov = curve_fit(f,x,y,sigma=y_err)
     perr = np.sqrt(np.diag(pcov))
+
+    data_final = open(f'../Data/Pendulum/{filename.replace(".dat","").split("/")[-1]}_results.pkl','wb')
+
+    dict_final = {'x': x,
+                'y': y,
+                'fit_slope': popt[0],
+                'fit_slope_err': perr[0],
+                'fit_cutoff': popt[1],
+                'fit_cutoff_err': perr[1],
+                }
+
+    import pickle
+    pickle.dump(dict_final, data_final, protocol=2)
+
+    data_final.close()
     
 
     return popt[0], perr[0]
