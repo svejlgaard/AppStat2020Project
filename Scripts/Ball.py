@@ -8,6 +8,7 @@ from scipy.signal import find_peaks
 from iminuit import Minuit 
 from probfit import Chi2Regression
 from scipy.optimize import curve_fit
+from statsmodels.stats.weightstats import DescrStatsW
 
 # Sets the directory to the current directory
 os.chdir(sys.path[0])
@@ -109,22 +110,32 @@ class Ball():
         self.a_err = position_fit.errors["a"]
     
 
-    def get_angle(self):
+    def get_angle(self, flip = True):
         angles = get_angles()
 
-        phi_r = angles[['inc_r']]
-        phi_l = angles[['inc_l']]
+        angle_dict = dict()
+        for a in ['r','l']:
+            phi = np.radians(angles[[f'inc_{a}']])
+            flip = np.radians(angles[[f'inc_flip_{a}']])
 
-        phi_r = np.radians(phi_r)
-        phi_l = np.radians(phi_l)
+            phi_mean = np.mean(phi.values)
+            phi_mean_err = np.std(phi.values) / np.sqrt(3)
+            
+            flip_mean = np.mean(flip.values)
+            flip_mean_err = np.std(flip.values) / np.sqrt(3)
 
-        self.phi_r_mu = phi_r.values.mean()
-        self.phi_r_std = phi_r.values.std()
-        self.phi_r_mu_err = self.phi_r_std / np.sqrt(3)
+            true_phi = (phi_mean + flip_mean) / 2
 
-        self.phi_l_mu = phi_l.values.mean()
-        self.phi_l_std = phi_l.values.std()
-        self.phi_l_mu_err = self.phi_l_std / np.sqrt(3)
+            true_phi_err = np.sqrt(phi_mean_err**2 + flip_mean_err**2) / 2
+            
+            angle_dict.update({f'phi_{a}': [true_phi, true_phi_err]})
+        
+
+        self.phi_r_mu = angle_dict['phi_r'][0]
+        self.phi_r_std = angle_dict['phi_r'][1]
+
+        self.phi_l_mu = angle_dict['phi_l'][0]
+        self.phi_l_std = angle_dict['phi_l'][1]
 
         self.dphi_mu = self.phi_r_mu - self.phi_l_mu
         self.dphi_std = np.sqrt(self.phi_r_std**2 + self.phi_l_std**2)
