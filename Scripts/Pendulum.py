@@ -68,13 +68,21 @@ class Pendulum():
 
         data_string = data_string.transpose()
         data_string.columns = ['top','bottom']
+        data_string['error'] = [0.05, 0.05, 0.05]
 
         # Defining the length of the string 
         len_string = data_string['top'] - data_string['bottom']
+
+        err_string = np.sqrt(data_string['error'].values**2 + data_string['error'].values**2)
         
+        string_weighted = DescrStatsW(len_string, weights=err_string)
+
+        string_mean = string_weighted.mean
+        string_sigma = string_weighted.std
+        string_mean_err = string_sigma / np.sqrt(len(self.namelist))
 
         # Printing the mean and the error on the mean
-        print(f'The length of the string is {np.mean(len_string.values):.2f} +- {np.std(len_string.values/np.sqrt(3)):.2f}')
+        print(f'The length of the string is {string_mean:.2f} +- {string_mean_err:.2f}')
         
 
         # Similar for the pendulum bob...
@@ -82,21 +90,39 @@ class Pendulum():
         data_bob = data_bob.dropna(axis=1)
         data_bob = data_bob.transpose()
         data_bob.index = ['Simone', 'Niall', 'Charl']
+        data_bob.columns = ['height']
+        data_bob['error'] = [0.05, 0.05, 0.05]
 
-        print(f'The pendulum bob height is {np.mean(data_bob.values):.2f} +- {np.std(data_bob.values/np.sqrt(3)):.2f}')
+        bob_weighted = DescrStatsW(data_bob['height'].values, weights=data_bob['error'].values)
+
+        bob_mean = bob_weighted.mean
+        bob_sigma = bob_weighted.std
+        bob_mean_err = bob_sigma / np.sqrt(len(self.namelist))
+
+        print(f'The pendulum bob height is {bob_mean:.2f} +- {bob_mean_err:.2f}')
         
         # Dividing by 10 to convert from mm to cm
         data_bob = data_bob / 10
 
         # Dividing by 2 to get the distance to the centre of mass
         data_bob = data_bob / 2
-        # ^^ (Could have been written as a one-liner, but no it has to be difficuelt)
+        # ^^ (Could have been written as a one-liner, but no, it has to be difficuelt)
 
         # Defining the total length of the pendulum and converting from cm to m
-        total_len = (len_string.values + data_bob.values) / 100
+        total_len = (len_string.values + data_bob['height'].values) / 100
+        err_string = err_string / 100
+        data_bob['error'] = data_bob['error'] / 100
+        total_err = np.sqrt(err_string**2 + data_bob['error'].values**2)
+        
 
-        self.L_mu = np.mean(total_len)
-        self.L_sigma = np.std(total_len)
+        total_weighted = DescrStatsW(total_len, weights=total_err)
+
+        total_mean = total_weighted.mean
+        total_sigma = total_weighted.std
+
+
+        self.L_mu = total_mean
+        self.L_sigma = total_sigma
 
         # The error on the mean assuming that each observer is a strong INDEPENDENT woman
         self.L_mu_err = self.L_sigma / np.sqrt(len(self.namelist))
