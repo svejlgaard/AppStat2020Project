@@ -5,12 +5,22 @@ import os, contextlib, sys
 from datetime import datetime
 from Residuals import get_period
 from statsmodels.stats.weightstats import DescrStatsW
+from scipy.stats import chi2_contingency, chi2
+from itertools import combinations
 
 class Pendulum():
 
     def __init__(self, namelist, printing = False):
         self.namelist = namelist
         self.printing = printing
+
+    
+    def get_chi2(self, name, measurements, err):
+        chi2_sum = [(i - j)**2 / err[np.argwhere(measurements == i)]**2 for i,j in combinations(measurements,2)]
+        true_chi2 = np.sum(chi2_sum)
+        true_p = chi2.sf(true_chi2, len(measurements)-1)
+        print(f'For the {name} measurements, the Chi2 is {true_chi2:.3f} and p is {true_p:.3f}')
+
     
     def period(self):
         
@@ -30,6 +40,8 @@ class Pendulum():
         time_df = time_df.transpose()
         time_df.columns = (['period','error'])
         
+        self.get_chi2('period', time_df['period'].values, time_df['error'].values)
+
         if not self.printing:
             # Creating a DescrStatsW class with the data to easily calculate the weighted mean
             # and the weighted errors
@@ -72,15 +84,14 @@ class Pendulum():
 
         # Defining the length of the string 
         len_string = data_string['top'] - data_string['bottom']
-
-        err_string = np.sqrt(data_string['error'].values**2 + data_string['error'].values**2)
         
-        string_weighted = DescrStatsW(len_string, weights=err_string)
+        err_string = np.ones_like(len_string) * np.std(len_string)
+        self.get_chi2('string',len_string, err_string)
 
-        string_mean = string_weighted.mean
-        string_sigma = string_weighted.std
-        string_mean_err = string_sigma / np.sqrt(len(self.namelist))
-
+        string_mean = np.mean(len_string)
+        string_sigma = np.std(len_string)
+        string_mean_err = string_sigma
+        
         # Printing the mean and the error on the mean
         print(f'The length of the string is {string_mean:.2f} +- {string_mean_err:.2f}')
         
@@ -94,6 +105,10 @@ class Pendulum():
         data_bob['error'] = [0.05, 0.05, 0.05]
 
         bob_weighted = DescrStatsW(data_bob['height'].values, weights=data_bob['error'].values)
+        
+
+        self.get_chi2('bob', data_bob['height'].values, data_bob['error'].values)
+        
 
         bob_mean = bob_weighted.mean
         bob_sigma = bob_weighted.std
