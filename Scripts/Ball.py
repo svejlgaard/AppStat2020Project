@@ -81,9 +81,10 @@ class Ball():
 
     def get_diameter(self):
         self.get_chi2(f'Diameter', self.diameter.values, np.array([0.05, 0.05, 0.05]))
-        self.diameter_mean = self.diameter.mean()
-        self.diameter_mean_err = self.diameter.std()/np.sqrt(len(self.diameter))
-        self.diameter_std = self.diameter.std()
+        all_diameter = DescrStatsW(self.diameter, weights=1/(np.array([0.05, 0.05, 0.05]))**2)
+        self.diameter_mean = all_diameter.mean
+        self.diameter_mean_err = all_diameter.std/np.sqrt(len(self.diameter))
+        self.diameter_std = all_diameter.std
         print(f' The diameter of the {self.ball} is {1000*self.diameter_mean:.2f} +- {1000*self.diameter_mean_err:.2f}')
 
 
@@ -171,11 +172,11 @@ class Ball():
             flip = angles[[f'inc_flip_{a}']]
             err = 1
 
-            phi_des = DescrStatsW(phi, weights = [err, err, err])
+            phi_des = DescrStatsW(phi, weights = 1/(np.array([err, err, err]))**2)
             phi_mean = phi_des.mean
             phi_mean_err = phi_des.std / np.sqrt(3)
             
-            flip_des = DescrStatsW(flip, weights = [err, err, err])
+            flip_des = DescrStatsW(flip, weights = 1/(np.array([err, err, err]))**2)
             flip_mean = flip_des.mean
             flip_mean_err = flip_des.std / np.sqrt(3)
 
@@ -213,7 +214,7 @@ class Ball():
         
         self.dphi_std_a = np.sqrt(err1 + err2 + err3) + 0.05
         
-        combined_dphi = DescrStatsW([self.dphi_mu_g, self.dphi_mu_a], [self.dphi_mu_err_g, self.dphi_std_a])
+        combined_dphi = DescrStatsW([self.dphi_mu_g, self.dphi_mu_a], weights=1/(np.array([self.dphi_mu_err_g, self.dphi_std_a]))**2)
 
 
         self.dphi_mu = combined_dphi.mean
@@ -228,8 +229,12 @@ class Ball():
         # Converting from mm to m
         rail = rail / 1000
 
-        self.rail_mu = np.mean(rail)
-        self.rail_std = np.std(rail)
+        rail_err = 0.05 / 1000
+
+        all_rail = DescrStatsW(rail, weights=1/(np.array([rail_err, rail_err, rail_err]))**2)
+
+        self.rail_mu = all_rail.mean
+        self.rail_std = all_rail.std
         self.rail_mu_err = self.rail_std / np.sqrt(3)
 
         # Based on the equations from the report for the ball 
@@ -243,8 +248,8 @@ class Ball():
         
         # Splitted to 
         err_term1 = paranthesis * 1/np.sin(angle) * self.a_err**2
-        err_term2 = self.a**2 * paranthesis * np.cos(angle)**2 / np.sin(angle)**4 * np.radians(self.phi_r_std)**2
-        err_term3 = self.a**2 * paranthesis * np.cos(angle)**2 / np.sin(angle)**4 * np.radians(self.dphi_std)**2
+        err_term2 = self.a**2 * paranthesis * np.cos(angle)**2 / np.sin(angle)**4 * self.phi_r_std**2
+        err_term3 = self.a**2 * paranthesis * np.cos(angle)**2 / np.sin(angle)**4 * self.dphi_std**2
         err_term4 = self.a**2 / np.sin(angle)**2 * (4*self.diameter_mean / (5* (self.diameter_mean**2 + self.rail_mu**2)) - 4*self.diameter_mean**3 / (5* (self.diameter_mean**2 + self.rail_mu**2)))**2 * self.diameter_std**2
         err_term5 = self.a**2 * 16 * self.diameter_mean**4 * self.rail_mu**2 / (25 * np.sin(angle)**2 * (self.diameter_mean**2 - self.rail_mu**2)**4 ) * self.rail_std**2 
 
