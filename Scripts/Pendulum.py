@@ -80,17 +80,20 @@ class Pendulum():
 
         data_string = data_string.transpose()
         data_string.columns = ['top','bottom']
-        data_string['error'] = [0.05, 0.05, 0.05]
+        data_string['error'] = [0.1, 0.1, 0.1]
 
         # Defining the length of the string 
         len_string = data_string['top'] - data_string['bottom']
         
-        err_string = np.ones_like(len_string) * np.std(len_string)
+        err_string = data_string['error']
         self.get_chi2('string',len_string, err_string)
 
-        string_mean = np.mean(len_string)
-        string_sigma = np.std(len_string)
-        string_mean_err = string_sigma
+
+        string_gen = DescrStatsW(len_string, weights=err_string)
+
+        string_mean = string_gen.mean
+        string_sigma = string_gen.std
+        string_mean_err = string_gen.std / np.sqrt(3)
         
         # Printing the mean and the error on the mean
         print(f'The length of the string is {string_mean:.2f} +- {string_mean_err:.2f}')
