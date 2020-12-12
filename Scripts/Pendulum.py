@@ -45,7 +45,7 @@ class Pendulum():
         if not self.printing:
             # Creating a DescrStatsW class with the data to easily calculate the weighted mean
             # and the weighted errors
-            time_weighted = DescrStatsW(time_df['period'], weights=time_df['error'])
+            time_weighted = DescrStatsW(time_df['period'], weights=1/(time_df['error'])**2)
 
             self.T_mu = time_weighted.mean
             self.T_sigma = time_weighted.std
@@ -89,7 +89,7 @@ class Pendulum():
         self.get_chi2('string',len_string, err_string)
 
 
-        string_gen = DescrStatsW(len_string, weights=err_string)
+        string_gen = DescrStatsW(len_string, weights=1/(err_string)**2)
 
         string_mean = string_gen.mean
         string_sigma = string_gen.std
@@ -107,7 +107,7 @@ class Pendulum():
         data_bob.columns = ['height']
         data_bob['error'] = [0.05, 0.05, 0.05]
 
-        bob_weighted = DescrStatsW(data_bob['height'].values, weights=data_bob['error'].values)
+        bob_weighted = DescrStatsW(data_bob['height'].values, weights=1/(data_bob['error'].values)**2)
         
 
         self.get_chi2('bob', data_bob['height'].values, data_bob['error'].values)
@@ -133,7 +133,7 @@ class Pendulum():
         total_err = np.sqrt(err_string**2 + data_bob['error'].values**2)
         
 
-        total_weighted = DescrStatsW(total_len, weights=total_err)
+        total_weighted = DescrStatsW(total_len, weights=1/(total_err)**2)
 
         total_mean = total_weighted.mean
         total_sigma = total_weighted.std
